@@ -155,27 +155,20 @@ template <typename a, typename b, typename f_b_a_b>
   requires std::invocable<f_b_a_b, b, a>
     && std::convertible_to<f_b_a_b,std::function<b(b, a)>>
 b reduceLeft(f_b_a_b f, b init, List<a> const& xs )
-  { b acc = init;
-    List<a> actual = xs; // Hacemos una copia porque xs es const
-    
-    while (!actual.isEmpty()) { // Si isEmpty() te da error luego, prueba con empty()
-        acc = f(acc, actual.head());
-        actual = actual.tail();
+ b acc = init;
+    List<a> temp = xs;
+    while (!temp.isEmpty()) {
+        acc = f(acc, temp.head());
+        temp = temp.tail();
     }
-    
     return acc;
-  }
 
 template <typename a, typename b, typename f_b_a_b>
   requires std::invocable<f_b_a_b, b, a>
     && std::convertible_to<f_b_a_b,std::function<b(b, a)>>
 b reduceLeftRec(f_b_a_b f, b init, List<a> const& xs )
-  {if (xs.isEmpty()) {
-        return init;
-    }
-    
-    return reduceLeftRec(f, f(init, xs.head()), xs.tail());
-  }
+ if (xs.isEmpty()) return init;
+    return reduceLeftRec(f, f(init, xs.head()), xs.tail());}
 
 template <typename a, typename b, typename f_a_b>
   requires std::invocable<f_a_b, a>
@@ -183,10 +176,10 @@ template <typename a, typename b, typename f_a_b>
 List<b> map(f_a_b f, List<a> const& xs )
   {
     List<b> res;
-    List<a> actual = xs;
-    while (!actual.isEmpty()) {
-        res = res.cons(f(actual.head()));
-        actual = actual.tail();
+    List<a> temp = xs;
+    while (!temp.isEmpty()) {
+        res = res.cons(f(temp.head()));
+        temp = temp.tail();
     }
     return res;
 }
@@ -196,203 +189,126 @@ template <typename a, typename b, typename f_a_b>
     && std::convertible_to<f_a_b,std::function<b(a)>>
 List<b> mapRec(f_a_b f, List<a> const& xs )
   {
-    if (xs.isEmpty()) {
-        return List<b>();
-    }
+    if (xs.isEmpty()) return List<b>();
     return mapRec(f, xs.tail()).cons(f(xs.head()));
+}
 
 template <typename a, typename b, typename f_a_b>
   requires std::invocable<f_a_b, a>
     && std::convertible_to<f_a_b,std::function<b(a)>>
-List<b> mapReduce(f_a_b f, b init, List<a> const& xs )
-  {
-    return reduceLeft(f, init, map(f, xs));
-}
-   
-
+List<b> mapReduce(f_a_b f, List<a> const& xs )
+ {
+    return reduceLeft([f](List<b> acc, a val) {
+        return acc.cons(f(val));
+    }, List<b>(), xs);
+} 
 
 template <typename t>
 List<t> concat(List<List<t>> const& xss)
-  {
-    List<t> res;
-    List<List<t>> actual = xss;
-    while (!actual.isEmpty()) {
-        List<t> sublista = actual.head();
-        while (!sublista.isEmpty()) {
-            res = res.cons(sublista.head());
-            sublista = sublista.tail();
-        }
-        actual = actual.tail();
-    }
-    return res;
-}
+  return reduceLeft([](List<t> acc, List<t> sub) {
+        return reduceLeft([](List<t> iAcc, t v) { return iAcc.cons(v); }, acc, sub);
+    }, List<t>(), xss);
 
 
 template <typename a, typename f_a_b>
   requires std::invocable<f_a_b, a>
     && std::convertible_to<f_a_b,std::function<bool(a)>>
 List<a> filter(f_a_b f, List<a> const& xs )
-  {
-    List<a> res;
-    List<a> actual = xs;
-    while (!actual.isEmpty()) {
-        if (f(actual.head())) {
-            res = res.cons(actual.head());
-        }
-        actual = actual.tail();
+  List<a> res;
+    List<a> temp = xs;
+    while (!temp.isEmpty()) {
+        if (f(temp.head())) res = res.cons(temp.head());
+        temp = temp.tail();
     }
     return res;
-}
 
 
 template <typename a, typename f_a_b>
   requires std::invocable<f_a_b, a>
     && std::convertible_to<f_a_b,std::function<bool(a)>>
 List<a> filterRec(f_a_b f, List<a> const& xs )
-  {
-    if (xs.isEmpty()) return List<a>();
-    if (f(xs.head())) {
-        return filterRec(f, xs.tail()).cons(xs.head());
-    }
-    return filterRec(f, xs.tail());
-}
+  {if (xs.isEmpty()) return List<a>();
+    List<a> r = filterRec(f, xs.tail());
+    return f(xs.head()) ? r.cons(xs.head()) : r;}
 
 template <typename a, typename f_a_b>
   requires std::invocable<f_a_b, a>
     && std::convertible_to<f_a_b,std::function<bool(a)>>
 List<a> filterMap(f_a_b f, List<a> const& xs )
-  {
-    return map(f, filter(f, xs));
-}
+  {auto m = map([f](a v) { 
+        List<a> l; 
+        return f(v) ? l.cons(v) : l; 
+    }, xs);
+    return concat(m);}
 
 template <typename a, typename f_a_b>
   requires std::invocable<f_a_b, a>
     && std::convertible_to<f_a_b,std::function<bool(a)>>
 List<a> filterReduce(f_a_b f, List<a> const& xs )
-  {
-    return reduceLeft(f, init, filter(f, xs));
-}
+  {return reduceLeft([f](List<a> acc, a v) {
+        return f(v) ? acc.cons(v) : acc;
+    }, List<a>(), xs);}
 
 template <typename t>
   requires EqImplementation<t>
 List<List<t>> groupEqual(List<t> const& xs)
-  {
-    if (xs.isEmpty()) return List<List<t>>();
-    List<List<t>> res;
-    List<t> actual = xs;
-    while (!actual.isEmpty()) {
-        t valor = actual.head();
-        List<t> grupo;
-        while (!actual.isEmpty() && actual.head() == valor) {
-            grupo = grupo.cons(actual.head());
-            actual = actual.tail();
-        }
-        res = res.cons(grupo);
-    }
-    return res;
-}
+  {return reduceLeft([](List<List<t>> acc, t v) {
+        if (acc.isEmpty()) return acc.cons(List<t>().cons(v));
+        List<t> last = acc.head();
+        if (Eq<t>::eq(v, last.head())) return acc.tail().cons(last.cons(v));
+        return acc.cons(List<t>().cons(v));
+    }, List<List<t>>(), xs);}
 
 template <typename t>
   requires EqImplementation<t>
 List<std::tuple<t, int>> encode(List<t> const& xs)
-  {
-    List<List<t>> grupos = groupEqual(xs);
-    List<std::tuple<t, int>> res;
-    List<List<t>> actual = grupos;
-    while (!actual.isEmpty()) {
-        List<t> g = actual.head();
-        int contador = 0;
-        List<t> temp = g;
-        while (!temp.isEmpty()) {
-            contador++;
-            temp = temp.tail();
-        }
-        res = res.cons(std::make_tuple(g.head(), contador));
-        actual = actual.tail();
-    }
-    return res;
-}
+  {return reduceLeft([](List<std::tuple<t, int>> acc, List<t> sub) {
+        int n = 0;
+        List<t> tmp = sub;
+        while(!tmp.isEmpty()) { n++; tmp = tmp.tail(); }
+        return acc.cons(std::make_tuple(sub.head(), n));
+    }, List<std::tuple<t, int>>(), groupEqual(xs));}
 
 template <typename t>
   requires EqImplementation<t>
 List<t> decode(List<std::tuple<t, int>> const& xss)
-  {
-    List<t> res;
-    List<std::tuple<t, int>> actual = xss;
-    while (!actual.isEmpty()) {
-        std::tuple<t, int> pareja = actual.head();
-        for (int i = 0; i < std::get<1>(pareja); ++i) {
-            res = res.cons(std::get<0>(pareja));
-        }
-        actual = actual.tail();
-    }
-    return res;
-}
+  {return reduceLeft([](List<t> acc, std::tuple<t, int> p) {
+        List<t> tmp = acc;
+        for(int i=0; i<std::get<1>(p); i++) tmp = tmp.cons(std::get<0>(p));
+        return tmp;
+    }, List<t>(), xss);}
 
 template <typename a, typename b>
   List<std::tuple<a,b>> zip(List<a> const& xs, List<b> const& ys)
- {
-    List<std::tuple<a, b>> res;
-    List<a> actualX = xs;
-    List<b> actualY = ys;
-    while (!actualX.isEmpty() && !actualY.isEmpty()) {
-        res = res.cons(std::make_tuple(actualX.head(), actualY.head()));
-        actualX = actualX.tail();
-        actualY = actualY.tail();
-    }
-    return res;
-}
+  {if (xs.isEmpty() || ys.isEmpty()) return List<std::tuple<a,b>>();
+    return zip(xs.tail(), ys.tail()).cons(std::make_tuple(xs.head(), ys.head()));}
 
 template <typename t>
   List<t> dropEveryN(int n, List<t> const& xs)
-  {
-    List<t> res;
-    List<t> actual = xs;
-    int i = 1;
-    while (!actual.isEmpty()) {
-        if (i % n != 0) {
-            res = res.cons(actual.head());
-        }
-        actual = actual.tail();
-        i++;
-    }
-    return res;
-}
+  {List<int> idx; int c = 1; List<t> tmp = xs;
+    while(!tmp.isEmpty()) { idx = idx.cons(c++); tmp = tmp.tail(); }
+    return map([](auto p){return std::get<0>(p);}, 
+           filter([n](auto p){return std::get<1>(p)%n != 0;}, zip(xs, idx)));}
 
 
 template <typename t, typename f_a_b>
   requires std::invocable<f_a_b, t, t>
     && std::convertible_to<f_a_b,std::function<bool(t, t)>>
   List<t> sortBy(List<t> const& xs, f_a_b f)
-  {
-    if (xs.isEmpty()) return List<t>();
-    t pivot = xs.head();
-    List<t> restos = xs.tail();
-    
-    auto menores = filter([&](t x) { return f(x, pivot); }, restos);
-    auto mayores = filter([&](t x) { return !f(x, pivot); }, restos);
-    
-    return concat(List<List<t>>().cons(sortBy(mayores, f)).cons(List<t>().cons(pivot)).cons(sortBy(menores, f)));
-}
+  {if (xs.isEmpty()) return xs;
+    t p = xs.head(); List<t> r = xs.tail();
+    List<t> l = filter([&](t x){return f(x,p);}, r);
+    List<t> rg = filter([&](t x){return !f(x,p);}, r);
+    return concat(List<List<t>>().cons(sortBy(rg,f)).cons(List<t>().cons(p)).cons(sortBy(l,f)));}
 
 template <typename t>
   List<t> rotateByN(List<t> const& xs, int n)
-  {
-    if (xs.isEmpty()) return xs;
-    int len = 0;
-    List<t> temp = xs;
-    while (!temp.isEmpty()) { 
-        len++; 
-        temp = temp.tail(); 
-    }
-    
-    int realN = n % len;
-    if (realN < 0) realN += len;
-    
-    List<t> res = xs;
-    for (int i = 0; i < realN; ++i) {
-        t h = res.head();
-        res = res.tail().cons(h);
-    }
-    return res;
-}
+  {int s = 0; List<t> tmp = xs;
+    while(!tmp.isEmpty()) { s++; tmp = tmp.tail(); }
+    if(s == 0) return xs;
+    int sh = n % s;
+    List<int> ids; for(int i=0; i<s; i++) ids = ids.cons(i);
+    auto srt = sortBy(zip(xs, ids), [sh, s](auto a, auto b) {
+        return ((std::get<1>(a)-sh+s)%s) <= ((std::get<1>(b)-sh+s)%s);
+    });
+    return map([](auto p){return std::get<0>(p);}, srt);}
