@@ -167,7 +167,7 @@ template <typename a, typename b, typename f_b_a_b>
   requires std::invocable<f_b_a_b, b, a>
     && std::convertible_to<f_b_a_b,std::function<b(b, a)>>
 b reduceLeftRec(f_b_a_b f, b init, List<a> const& xs )
- if (xs.isEmpty()) return init;
+{ if (xs.isEmpty()) return init;
     return reduceLeftRec(f, f(init, xs.head()), xs.tail());}
 
 template <typename a, typename b, typename f_a_b>
@@ -204,16 +204,16 @@ List<b> mapReduce(f_a_b f, List<a> const& xs )
 } 
 
 template <typename t>
-List<t> concat(List<List<t>> const& xss)
+List<t> concat(List<List<t>> const& xss) {
   return reduceLeft([](List<t> acc, List<t> sub) {
         return reduceLeft([](List<t> iAcc, t v) { return iAcc.cons(v); }, acc, sub);
-    }, List<t>(), xss);
+    }, List<t>(), xss); }
 
 
 template <typename a, typename f_a_b>
   requires std::invocable<f_a_b, a>
     && std::convertible_to<f_a_b,std::function<bool(a)>>
-List<a> filter(f_a_b f, List<a> const& xs )
+List<a> filter(f_a_b f, List<a> const& xs )  {
   List<a> res;
     List<a> temp = xs;
     while (!temp.isEmpty()) {
