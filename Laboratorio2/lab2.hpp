@@ -162,7 +162,7 @@ b reduceLeft(f_b_a_b f, b init, List<a> const& xs )
         temp = temp.tail();
     }
     return acc;
-
+ }
 template <typename a, typename b, typename f_b_a_b>
   requires std::invocable<f_b_a_b, b, a>
     && std::convertible_to<f_b_a_b,std::function<b(b, a)>>
@@ -221,7 +221,7 @@ List<a> filter(f_a_b f, List<a> const& xs )  {
         temp = temp.tail();
     }
     return res;
-
+ }
 
 template <typename a, typename f_a_b>
   requires std::invocable<f_a_b, a>
