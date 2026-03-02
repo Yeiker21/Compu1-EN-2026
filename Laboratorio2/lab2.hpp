@@ -155,14 +155,15 @@ template <typename a, typename b, typename f_b_a_b>
   requires std::invocable<f_b_a_b, b, a>
     && std::convertible_to<f_b_a_b,std::function<b(b, a)>>
 b reduceLeft(f_b_a_b f, b init, List<a> const& xs ) {
- b acc = init;
+    b acc = init;
     List<a> temp = xs;
     while (!temp.isEmpty()) {
         acc = f(acc, temp.head());
         temp = temp.tail();
     }
     return acc;
- }
+}
+
 template <typename a, typename b, typename f_b_a_b>
   requires std::invocable<f_b_a_b, b, a>
     && std::convertible_to<f_b_a_b,std::function<b(b, a)>>
@@ -207,7 +208,8 @@ template <typename t>
 List<t> concat(List<List<t>> const& xss) {
   return reduceLeft([](List<t> acc, List<t> sub) {
         return reduceLeft([](List<t> iAcc, t v) { return iAcc.cons(v); }, acc, sub);
-    }, List<t>(), xss); }
+    }, List<t>(), xss); 
+}
 
 
 template <typename a, typename f_a_b>
@@ -239,7 +241,8 @@ List<a> filterMap(f_a_b f, List<a> const& xs )
         List<a> l; 
         return f(v) ? l.cons(v) : l; 
     }, xs);
-    return concat(m);}
+    return concat(m);
+  }
 
 template <typename a, typename f_a_b>
   requires std::invocable<f_a_b, a>
