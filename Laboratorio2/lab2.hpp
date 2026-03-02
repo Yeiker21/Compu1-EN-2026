@@ -154,7 +154,7 @@ bool operator!=(const List<t>& xs, const List<t>& ys) {
 template <typename a, typename b, typename f_b_a_b>
   requires std::invocable<f_b_a_b, b, a>
     && std::convertible_to<f_b_a_b,std::function<b(b, a)>>
-b reduceLeft(f_b_a_b f, b init, List<a> const& xs )
+b reduceLeft(f_b_a_b f, b init, List<a> const& xs ) {
  b acc = init;
     List<a> temp = xs;
     while (!temp.isEmpty()) {
