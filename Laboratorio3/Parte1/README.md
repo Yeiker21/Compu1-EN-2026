@@ -51,7 +51,7 @@ Marque con una X solo las que son verdaderas. A veces puede haber más de una o 
 
 P Para todo h ∈ H(A)
 - [ ] L(h) es menor que M(A)
-- [ ] L(h) es menor o igual a M(A)
+- [X] L(h) es menor o igual a M(A)
 - [ ] M(A) es menor o igual a L(h)
 - [ ] M(A) es igual a L(h)
 
@@ -63,7 +63,7 @@ P Para todo A
 - [ ] |A| = 2 * |H(A)| - 1
 - [ ] |H(A)| < |A - H(A)|
 - [ ] |A - H(A)| < |H(A)|
-- [ ] |H(A)| < |A|
+- [X] |H(A)| < |A|
 
 Sea x un valor a buscar en A.
 Dado un nodo n, denotamos el valor de n de esta manera: v(n).
@@ -81,13 +81,13 @@ P Sea n ∈ A entonces
 - [ ] M(lhs(n)) < M(rhs(n))
 - [ ] M(lhs(n)) = M(rhs(n))
 - [ ] M(A(n)) = M(lhs(n)) + M(rhs(n))
-- [ ] M(A(n)) = 1 + max(M(lhs(n)), M(rhs(n)))
+- [X] M(A(n)) = 1 + max(M(lhs(n)), M(rhs(n)))
 
 
 P Sea x un valor a buscar en A que de hecho se encuentra en A, aunque no sabemos de antemano.
 Y sea c el número de comparaciones a realizar para conseguir x en el árbol A. Entonces tenemos:
-- [ ] c <= |A|
-- [ ] c <= M(A)
+- [X] c <= |A|
+- [X] c <= M(A)
 - [ ] existe un h tal que c < L(h) donde h ∈ H(A)
 - [ ] existe un h tal que c = L(h) donde h ∈ H(A)
 
@@ -114,14 +114,14 @@ obviamente, otra forma de decir que los Macondianos de los subárboles no difier
    M(lhs(n)) = M(rhs(n))
 
 P Sea A un árbol binario de búsqueda perfectamente balanceado. Entonces,
-- [ ] ∀  h ∈  H(A) , L(h) = M(A)
+- [X] ∀  h ∈  H(A) , L(h) = M(A)
 - [ ] ∀  h ∈  H(A) , L(h) = 1 + M(A)
 - [ ] ∀  h ∈  H(A) existe un k ∈ H(A), donde h ≠ k, tal que L(h) ≠ L(k)
-- [ ] ∀  h ∈  H(A) y ∀  k ∈  H(A), donde h ≠ k, L(h) = L(k)
+- [X] ∀  h ∈  H(A) y ∀  k ∈  H(A), donde h ≠ k, L(h) = L(k)
 
 P  Sea A un árbol binario de búsqueda perfectamente balanceado y
 sean h ∈ H(A) y k ∈ H(A), donde h ≠ k, entonces
-- [ ] L(h) = L(k)
+- [X] L(h) = L(k)
 - [ ] L(h) ≠ L(k)
 - [ ] Siempre existe un k tal que L(h) = L(k)
 - [ ] Siempre existe un k tal que L(h) ≠ L(k)
@@ -130,6 +130,18 @@ sean h ∈ H(A) y k ∈ H(A), donde h ≠ k, entonces
 
 Esta pregunta es un poco más difícil que las anteriores, y se contabilizara como un extra la cual cuenta
 como 2 preguntas de esta seccion.
+Fórmula:
+|A| = 2^m - 1
+
+Demostración:
+1. Un árbol perfectamente balanceado equivale a un árbol binario completo.
+2. En el nivel 1 (la raíz), hay 2^0 = 1 nodo.
+3. En el nivel 2, hay 2^1 = 2 nodos.
+4. En cualquier nivel i, hay 2^(i-1) nodos.
+5. El número total de nodos |A| es la suma de los nodos en cada nivel desde 1 hasta m:
+   |A| = 2^0 + 2^1 + 2^2 + ... + 2^(m-1)
+6. Esta sumatoria corresponde a una progresión geométrica cuya suma total se simplifica matemáticamente como 2^m - 1.
+7.
 
 
 P  Sea A un árbol binario de búsqueda perfectamente balanceado y sea m = M(A).
