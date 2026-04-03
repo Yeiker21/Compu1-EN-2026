@@ -1,3 +1,6 @@
-Z => Z => Z mod := fn (Z x) -> fn (Z y) -> -1;
-Z => Z => Z gcd := fn (Z x) -> fn (Z y) -> -1;
-Z => Z => Z phi := fn (Z x) -> fn (Z y) -> -1;
+Z=>Z neg := fn(Z a) -> sub(a)(0);
+Z=>Z=>Z add := fn(Z a) -> fn(Z b) -> sub(neg(a))(b);
+Z=>Z=>Z ne := fn(Z a) -> fn(Z b) -> if(sub(a)(b), 1, if(sub(b)(a), 1, 0));
+Z=>Z=>Z mod := fn(Z x) -> fn(Z y) -> if(lt(y)(x), x, mod(sub(y)(x))(y));
+Z=>Z=>Z gcd := fn(Z x) -> fn(Z y) -> if(y, gcd(y)(mod(x)(y)), x);
+Z=>Z=>Z phi := fn(Z x) -> fn(Z y) -> if(lt(y)(x), add(if(ne(gcd(x)(y))(1), 0, 1))(phi(add(x)(1))(y)), if(ne(gcd(x)(y))(1), 0, 1));
