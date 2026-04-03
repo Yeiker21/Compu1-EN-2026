@@ -1,28 +1,50 @@
 ///
-/// Query.cxx - archiv para completar los ejercicios del examen
+/// Query.cxx - archivo para completar los ejercicios del examen
 ///
-/// Aqui deben realizar sus tareas de algebra relacional
-/// La salida de cada query debe imprimir la tabla del resultado
-/// .. y retornar EXIT_SUCCESS, de ser exitosa, o EXIT_FAILURE en caso de falla.
 
 #include "Query.h"
-// .. y otros encabezados que van a ser necesarios
 #include <cstdio>
 #include <cstdlib>
 #include <vector>
 #include "Estudiante.h"
+#include "Calificacion.h"
 
+// q0: Calcula el promedio de todas las notas en la universidad
 float Query::q0() {
-    fprintf(stderr, "El query q%d no está implementado todavía\n", 0);
-    return -1; // se supone que va a ser exitoso cuando lo implementen ;-)
+    float suma = 0;
+    int total = 0;
+    
+    for (const auto& c : Calificacion::tabla()) {
+        suma += c.nota();
+        total++;
+    }
+    
+    if (total == 0) return 0;
+    return suma / total;
 }
 
+// q1: Retorna un vector con todos los estudiantes activos
 std::vector<Estudiante> Query::q1() {
-    fprintf(stderr, "El query q%d no está implementado todavía\n", 1);
-    return {};
+    std::vector<Estudiante> resultado;
+    
+    for (const auto& e : Estudiante::tabla()) {
+        if (e.activo()) {
+            resultado.push_back(e);
+        }
+    }
+    
+    return resultado;
 }
 
+// q2: Cuenta cuántos estudiantes se han graduado
 int Query::q2() {
-    fprintf(stderr, "El query q%d no está implementado todavía\n", 2);
-    return -1;
+    int graduados = 0;
+    
+    for (const auto& e : Estudiante::tabla()) {
+        if (e.graduado()) {
+            graduados++;
+        }
+    }
+    
+    return graduados;
 }
